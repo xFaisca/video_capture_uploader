@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Batch Manager Pro</title>
+  <link rel="stylesheet" href="output.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans antialiased h-screen flex flex-col justify-between p-6 select-none">
+
+  <!-- Header & Navigation Tabs -->
+  <header class="flex items-center justify-between border-b border-zinc-800 pb-4">
+    <div class="flex items-center space-x-3">
+      <div class="p-2 bg-zinc-900 border border-zinc-800 rounded-md text-cyan-500">
+        <i data-lucide="video" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h1 class="text-lg font-semibold tracking-wide">Batch Manager Pro</h1>
+        <p class="text-xs text-zinc-400">Extração, Gravação e Upload Automático</p>
+      </div>
+    </div>
+    
+    <!-- Abas de Navegação -->
+    <div class="flex bg-zinc-900 border border-zinc-800 rounded-md p-1 gap-1">
+      <button id="tab-extractor" onclick="switchTab('extractor')" class="px-3 py-1.5 text-xs font-medium rounded bg-cyan-600 text-zinc-950 transition">Extrator</button>
+      <button id="tab-recorder" onclick="switchTab('recorder')" class="px-3 py-1.5 text-xs font-medium rounded text-zinc-400 hover:text-zinc-200 transition">Gravador Live</button>
+      <button id="tab-uploader" onclick="switchTab('uploader')" class="px-3 py-1.5 text-xs font-medium rounded text-zinc-400 hover:text-zinc-200 transition">Upload Filester</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="my-6 space-y-4 flex-1 flex flex-col overflow-hidden">
+    
+    <!-- ABA 1: EXTRATOR -->
+    <div id="view-extractor" class="flex-1 flex flex-col space-y-4 overflow-y-auto pr-1">
+      <!-- [MANTENHA O SEU CÓDIGO DO EXTRATOR AQUI INTEIRO] -->
+      <div class="space-y-1.5">
+        <label class="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
+          <i data-lucide="folder-open" class="w-4 h-4 text-cyan-500"></i> Pasta de Entrada (Vídeos Originais)
+        </label>
+        <div class="flex gap-2">
+          <input type="text" id="input-folder" readonly placeholder="Nenhuma pasta selecionada..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-300 focus:outline-none">
+          <button id="btn-select-input" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
+            <i data-lucide="folder" class="w-4 h-4 text-zinc-400"></i> Procurar
+          </button>
+        </div>
+      </div>
+      <div class="space-y-1.5">
+        <label class="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
+          <i data-lucide="folder-output" class="w-4 h-4 text-cyan-500"></i> Pasta de Destino
+        </label>
+        <div class="flex gap-2">
+          <input type="text" id="output-folder" readonly placeholder="Nenhuma pasta selecionada..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-300 focus:outline-none">
+          <button id="btn-select-output" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
+            <i data-lucide="folder" class="w-4 h-4 text-zinc-400"></i> Procurar
+          </button>
+        </div>
+      </div>
+      <button id="start-btn" class="w-full bg-cyan-600 hover:bg-cyan-500 text-zinc-950 font-semibold py-2.5 rounded-md text-sm transition flex items-center justify-center gap-2 mt-2 shadow-sm">
+        <i data-lucide="play" class="w-4 h-4 fill-current"></i> Iniciar Processamento em Lote
+      </button>
+      <div class="space-y-1">
+        <div class="flex justify-between text-xs text-zinc-400">
+          <span>Progresso Geral</span>
+          <span id="progress-text">0%</span>
+        </div>
+        <div class="w-full bg-zinc-900 border border-zinc-800 h-2 rounded-md overflow-hidden">
+          <div id="progress-bar" class="bg-cyan-600 h-full w-0 transition-all duration-300"></div>
+        </div>
+      </div>
+      <div class="flex-1 flex flex-col space-y-1 min-h-[100px]">
+        <label class="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+          <i data-lucide="terminal" class="w-3.5 h-3.5 text-zinc-500"></i> Log de Execução
+        </label>
+        <div id="log-box" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-md p-3 font-mono text-xs text-zinc-400 overflow-y-auto">
+          [Sistema pronto...]
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 2: GRAVADOR (NOVO) -->
+    <div id="view-recorder" class="hidden flex-1 flex flex-col space-y-4 overflow-hidden">
+      <!-- Configurações Rápidas -->
+      <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-lg grid grid-cols-4 gap-4">
+        <div>
+          <label class="text-[10px] text-zinc-400 uppercase font-bold">Pasta de Destino</label>
+          <div class="flex gap-1 mt-1">
+            <input type="text" id="rec-path" readonly class="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-xs text-zinc-300" placeholder="Selecione...">
+            <button id="btn-rec-path" class="bg-zinc-800 px-2 rounded hover:bg-zinc-700"><i data-lucide="folder" class="w-3 h-3"></i></button>
+          </div>
+        </div>
+        <div>
+          <label class="text-[10px] text-zinc-400 uppercase font-bold">Tamanho Máx (GB)</label>
+          <input type="number" id="rec-size" value="1" step="0.5" class="w-full mt-1 bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-xs text-zinc-300">
+        </div>
+        <div>
+          <label class="text-[10px] text-zinc-400 uppercase font-bold">Resolução Máx</label>
+          <select id="rec-res" class="w-full mt-1 bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-xs text-zinc-300">
+            <option value="1080">1080p</option>
+            <option value="720" selected>720p</option>
+            <option value="480">480p</option>
+            <option value="360">360p</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] text-zinc-400 uppercase font-bold">Simultâneas</label>
+          <input type="number" id="rec-concurrent" value="3" min="1" class="w-full mt-1 bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-xs text-zinc-300">
+        </div>
+      </div>
+      <button id="btn-save-rec-settings" class="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold py-1.5 rounded-md text-xs transition">Salvar Configurações do Gravador</button>
+
+      <!-- Adicionar Modelos -->
+      <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-lg">
+        <label class="text-xs font-medium text-zinc-300 flex items-center gap-1.5 mb-2">
+          <i data-lucide="link" class="w-4 h-4 text-cyan-500"></i> URLs das Modelos (uma por linha)
+        </label>
+        <textarea id="rec-urls" rows="3" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-xs font-mono focus:outline-none focus:border-cyan-600" placeholder="https://chaturbate.com/modelo1/&#10;https://chaturbate.com/modelo2/"></textarea>
+        <button id="btn-start-rec" class="mt-2 w-full bg-emerald-600 hover:bg-emerald-500 text-zinc-950 font-semibold py-2 rounded-md text-sm transition flex items-center justify-center gap-2 shadow-sm">
+          <i data-lucide="radio" class="w-4 h-4"></i> Iniciar Gravações
+        </button>
+      </div>
+
+      <!-- Lista de Gravações Ativas -->
+      <div class="flex-1 flex flex-col space-y-1 min-h-[150px]">
+        <label class="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+          <i data-lucide="activity" class="w-3.5 h-3.5 text-zinc-500"></i> Modelos em Gravação
+        </label>
+        <div id="rec-active-list" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-md p-3 grid grid-cols-1 md:grid-cols-2 gap-3 overflow-y-auto">
+          <div class="text-zinc-500 text-center py-8 col-span-2" id="rec-empty">Nenhuma gravação ativa.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 3: UPLOAD PARA O FILESTER -->
+    <div id="view-uploader" class="hidden flex-1 flex flex-col space-y-4 overflow-hidden">
+      <!-- [MANTENHA O SEU CÓDIGO DO UPLOADER AQUI INTEIRO] -->
+      <div class="space-y-1.5">
+        <label class="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
+          <i data-lucide="key" class="w-4 h-4 text-cyan-500"></i> API Key do Filester
+        </label>
+        <input type="password" id="filester-apikey" placeholder="Cole sua Bearer API Key aqui..." class="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-cyan-600">
+      </div>
+      <div class="space-y-1.5">
+        <label class="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
+          <i data-lucide="folder-up" class="w-4 h-4 text-cyan-500"></i> Pasta de Vídeos para Enviar
+        </label>
+        <div class="flex gap-2">
+          <input type="text" id="upload-folder" readonly placeholder="Selecione a pasta com os vídeos..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-300 focus:outline-none">
+          <button id="btn-select-upload" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2">
+            <i data-lucide="folder" class="w-4 h-4 text-zinc-400"></i> Procurar
+          </button>
+        </div>
+      </div>
+      <button id="start-upload-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-zinc-950 font-semibold py-2.5 rounded-md text-sm transition flex items-center justify-center gap-2 shadow-sm">
+        <i data-lucide="upload-cloud" class="w-4 h-4"></i> Iniciar Upload Organizado para o Filester
+      </button>
+      <div class="flex-1 flex flex-col space-y-1 min-h-[180px]">
+        <label class="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+          <i data-lucide="list-checks" class="w-3.5 h-3.5 text-zinc-500"></i> Fila de Upload e Progresso Individual
+        </label>
+        <div id="upload-queue-list" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-md p-3 space-y-2 overflow-y-auto font-mono text-xs text-zinc-300">
+          <div class="text-zinc-500 text-center py-8">Nenhum arquivo na fila de upload.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    // --- LÓGICA DE NAVEGAÇÃO DE ABAS ---
+    function switchTab(tab) {
+      const views = { extractor: 'view-extractor', recorder: 'view-recorder', uploader: 'view-uploader' };
+      const tabs = { extractor: 'tab-extractor', recorder: 'tab-recorder', uploader: 'tab-uploader' };
+      
+      Object.keys(views).forEach(k => {
+        document.getElementById(views[k]).classList.add('hidden');
+        document.getElementById(tabs[k]).className = "px-3 py-1.5 text-xs font-medium rounded text-zinc-400 hover:text-zinc-200 transition";
+      });
+
+      document.getElementById(views[tab]).classList.remove('hidden');
+      document.getElementById(tabs[tab]).className = "px-3 py-1.5 text-xs font-medium rounded bg-cyan-600 text-zinc-950 transition";
+    }
+
+    // --- LÓGICA DO EXTRATOR (Já existente) ---
+    const inputInput = document.getElementById('input-folder');
+    const outputInput = document.getElementById('output-folder');
+    document.getElementById('btn-select-input').addEventListener('click', async () => { const f = await window.api.selectFolder(); if (f) inputInput.value = f; });
+    document.getElementById('btn-select-output').addEventListener('click', async () => { const f = await window.api.selectFolder(); if (f) outputInput.value = f; });
+    document.getElementById('start-btn').addEventListener('click', () => {
+      document.getElementById('log-box').innerText = '';
+      window.api.startProcessing({ inputFolder: inputInput.value, outputFolder: outputInput.value });
+    });
+    window.api.onLog((msg) => {
+      const box = document.getElementById('log-box');
+      box.innerText += msg + '\n';
+      box.scrollTop = box.scrollHeight;
+    });
+    window.api.onProgress((pct) => {
+      document.getElementById('progress-bar').style.width = pct + '%';
+      document.getElementById('progress-text').innerText = pct + '%';
+    });
+
+    // --- LÓGICA DO UPLOADER (Já existente) ---
+    document.getElementById('btn-select-upload').addEventListener('click', async () => {
+      const f = await window.api.selectFolder(); if (f) document.getElementById('upload-folder').value = f;
+    });
+    document.getElementById('start-upload-btn').addEventListener('click', () => {
+      const apiKey = document.getElementById('filester-apikey').value;
+      const folder = document.getElementById('upload-folder').value;
+      if (!apiKey || !folder) return alert('Informe a API Key e selecione a pasta de vídeos.');
+      document.getElementById('upload-queue-list').innerHTML = '';
+      window.api.startFilesterUpload({ apiKey, folder });
+    });
+    window.api.onUploadQueueInit((files) => {
+      const container = document.getElementById('upload-queue-list');
+      container.innerHTML = '';
+      files.forEach(file => {
+        container.innerHTML += `
+          <div id="file-row-${file.id}" class="bg-zinc-950/60 border border-zinc-800/80 p-2.5 rounded space-y-1.5">
+            <div class="flex justify-between text-[11px]">
+              <span class="text-zinc-200 truncate max-w-[280px]" title="${file.name}">${file.name}</span>
+              <span id="status-${file.id}" class="text-cyan-400 font-semibold">Aguardando...</span>
+            </div>
+            <div class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+              <div id="bar-${file.id}" class="bg-emerald-500 h-full w-0 transition-all duration-150"></div>
+            </div>
+          </div>`;
+      });
+    });
+    window.api.onUploadProgressUpdate((data) => {
+      const bar = document.getElementById(`bar-${data.id}`);
+      const status = document.getElementById(`status-${data.id}`);
+      if (bar) bar.style.width = data.percent + '%';
+      if (status) status.innerText = `${data.percent}% (${data.status})`;
+    });
+
+    // --- LÓGICA DO GRAVADOR (NOVO) ---
+    let recActiveModels = {};
+
+    // Carregar configurações salvas ao iniciar
+    async function loadRecSettings() {
+      const s = await window.api.getRecorderSettings();
+      document.getElementById('rec-path').value = s.savePath;
+      document.getElementById('rec-size').value = s.maxSizeGb;
+      document.getElementById('rec-res').value = s.maxResolution;
+      document.getElementById('rec-concurrent').value = s.maxConcurrent;
+    }
+    loadRecSettings();
+
+    // Selecionar pasta do gravador
+    document.getElementById('btn-rec-path').addEventListener('click', async () => {
+      const f = await window.api.selectFolder();
+      if (f) document.getElementById('rec-path').value = f;
+    });
+
+    // Salvar configurações do gravador
+    document.getElementById('btn-save-rec-settings').addEventListener('click', async () => {
+      const settings = {
+        savePath: document.getElementById('rec-path').value,
+        maxSizeGb: parseFloat(document.getElementById('rec-size').value),
+        maxResolution: document.getElementById('rec-res').value,
+        maxConcurrent: parseInt(document.getElementById('rec-concurrent').value)
+      };
+      await window.api.saveRecorderSettings(settings);
+      alert('Configurações do Gravador salvas!');
+    });
+
+    // Iniciar gravações
+    document.getElementById('btn-start-rec').addEventListener('click', async () => {
+      const urls = document.getElementById('rec-urls').value.split('\n').map(u => u.trim()).filter(u => u);
+      if (urls.length === 0) return alert('Cole pelo menos uma URL.');
+
+      for (const url of urls) {
+        let modelName = "desconhecida";
+        try {
+          const urlObj = new URL(url);
+          modelName = urlObj.pathname.replace(/\//g, '');
+        } catch (e) { continue; }
+
+        if (recActiveModels[modelName]) continue;
+
+        const res = await window.api.startRecording(url, modelName);
+        if (res.success) {
+          addRecCard(modelName);
+          document.getElementById('rec-urls').value = ''; // Limpa
+        } else {
+          alert(`Erro ao iniciar ${modelName}: ${res.error}`);
+        }
+      }
+    });
+
+    function addRecCard(modelName) {
+      document.getElementById('rec-empty').style.display = 'none';
+      const card = document.createElement('div');
+      card.id = `rec-card-${modelName}`;
+      card.className = "bg-zinc-950 border border-zinc-800 rounded p-2 flex flex-col h-32";
+      card.innerHTML = `
+        <div class="flex justify-between items-center mb-1">
+          <span class="font-bold text-cyan-400 text-xs truncate">${modelName}</span>
+          <button onclick="stopRec('${modelName}')" class="text-red-500 hover:text-red-400 text-[10px] font-bold">Parar</button>
+        </div>
+        <div class="flex-1 bg-zinc-900 rounded p-1.5 overflow-y-auto text-[10px] font-mono text-zinc-400" id="rec-log-${modelName}">
+          Iniciando...
+        </div>`;
+      document.getElementById('rec-active-list').appendChild(card);
+      recActiveModels[modelName] = true;
+    }
+
+    window.stopRec = async (modelName) => {
+      await window.api.stopRecording(modelName);
+    };
+
+    // Eventos de progresso do gravador
+    window.api.onRecordProgress((data) => {
+      const logBox = document.getElementById(`rec-log-${data.modelName}`);
+      if (logBox) {
+        const p = document.createElement('div');
+        p.innerText = data.log;
+        if (data.isError) p.className = "text-red-400";
+        logBox.appendChild(p);
+        logBox.scrollTop = logBox.scrollHeight;
+      }
+    });
+
+    window.api.onRecordStopped((data) => {
+      const logBox = document.getElementById(`rec-log-${data.modelName}`);
+      if (logBox) {
+        const p = document.createElement('div');
+        p.innerText = `\n[Finalizado - Código: ${data.code}]`;
+        p.className = "text-yellow-400 font-bold mt-1";
+        logBox.appendChild(p);
+      }
+      setTimeout(() => {
+        const card = document.getElementById(`rec-card-${data.modelName}`);
+        if (card) card.remove();
+        delete recActiveModels[data.modelName];
+        if (Object.keys(recActiveModels).length === 0) {
+          document.getElementById('rec-empty').style.display = 'block';
+        }
+      }, 3000);
+    });
+  </script>
+</body>
+</html>
